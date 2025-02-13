@@ -1,4 +1,5 @@
 import time
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -29,6 +30,25 @@ def get_reviews_selenium(product_id):
         except Exception:
             pass
 
+        # напиши код, который получит название товара и артикул здесь
+
+        # Получение названия товара
+        try:
+            product_name_element = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "product-page__title")))
+            product_name = product_name_element.text.strip()
+        except Exception:
+            product_name = "Не найдено"
+
+        # Получение артикула
+        try:
+            product_id_element = wait.until(EC.presence_of_element_located((By.ID, "productNmId")))
+            product_article = product_id_element.text.strip()
+        except Exception:
+            product_article = "Не найдено"
+
+        print(f"Название товара: {product_name}")
+        print(f"Артикул: {product_article}")
+
         try:
             reviews_tab = wait.until(
                 EC.element_to_be_clickable((By.XPATH, "//a[contains(@class, 'comments__btn-all')]"))
@@ -39,10 +59,28 @@ def get_reviews_selenium(product_id):
 
         time.sleep(3)
 
+        # Получение средней оценки и количества оценок
+        try:
+            rating_element = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "rating-product__numb")))
+            average_rating = rating_element.text.strip()
+        except Exception:
+            average_rating = "Не найдено"
+
+        try:
+            reviews_count_element = wait.until(
+                EC.presence_of_element_located((By.CLASS_NAME, "rating-product__review"))
+            )
+            reviews_count = reviews_count_element.text.strip()
+        except Exception:
+            reviews_count = "Не найдено"
+
+        print(f"Средняя оценка: {average_rating}")
+        print(f"Количество оценок: {reviews_count}")
+
         last_height = driver.execute_script("return document.body.scrollHeight")
-        for _ in range(6):
+        for _ in range(2):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(5)
+            time.sleep(7)
             new_height = driver.execute_script("return document.body.scrollHeight")
             if new_height == last_height:
                 break
@@ -66,7 +104,7 @@ def get_reviews_selenium(product_id):
                         rating = int(cls[4:])
                         break
 
-            advantages, disadvantages, comment = "", "", ""
+            advantages, disadvantages, comment, purchase_state = "", "", "", ""
             text_block = review.find("p", class_="feedback__text")
             if text_block:
                 for span in text_block.find_all("span", class_="feedback__text--item"):
@@ -83,6 +121,10 @@ def get_reviews_selenium(product_id):
                     else:
                         comment = span.get_text(strip=True)
 
+            state_span = review.find("span", class_="feedback__state--text")
+            if state_span:
+                purchase_state = state_span.get_text(strip=True)
+
             reviews.append(
                 {
                     "reviewer": reviewer,
@@ -90,6 +132,7 @@ def get_reviews_selenium(product_id):
                     "advantages": advantages,
                     "disadvantages": disadvantages,
                     "comment": comment,
+                    "purchase_state": purchase_state,
                 }
             )
 
@@ -111,6 +154,7 @@ if __name__ == "__main__":
             print(f"Достоинства: {review['advantages']}")
             print(f"Недостатки: {review['disadvantages']}")
             print(f"Комментарий: {review['comment']}")
+            print(f"Статус покупки: {review['purchase_state']}")
             print("-" * 50)
     else:
         print("Отзывы не найдены.")
