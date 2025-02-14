@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from config import WAIT_TIMEOUT_GET_PRODUCT
+from core.config import WAIT_TIMEOUT_GET_PRODUCT
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
