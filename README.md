@@ -7,7 +7,7 @@ Wildberries Review Parser — это инструмент для автомат�
 ## 🚀 Установка
 1. **Клонируйте репозиторий:**
    ```bash
-   git clone git@github.com:progmat64/wildberries_parser_review.git
+   git clone git@github.com:progmat64/wildberries_review_parser.git
    ```
 2. **Установите зависимости:**
    ```bash
