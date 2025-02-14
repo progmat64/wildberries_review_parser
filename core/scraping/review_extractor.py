@@ -1,15 +1,17 @@
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
-
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 class ReviewExtractor:
     """Класс для извлечения отзывов из загруженной страницы."""
 
     @staticmethod
     def get_product_name(driver):
-        """Извлекает название продукта."""
+        """Извлекает название продукта с ожиданием появления элемента."""
         try:
-            element = driver.find_element(By.CLASS_NAME, "product-page__title")
+            wait = WebDriverWait(driver, 10)  # Ожидание до 10 секунд
+            element = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "product-page__title")))
             return element.text.strip()
         except Exception:
             return "Не найдено"
