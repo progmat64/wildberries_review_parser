@@ -1,3 +1,4 @@
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -26,17 +27,30 @@ class PageLoader:
         except Exception:
             pass
 
-    def open_reviews_section(self):
-        """Открывает раздел отзывов."""
+    def _find_reviews_button(self, driver):
+        """Ищет кнопку для открытия раздела с отзывами."""
+        elems = driver.find_elements(
+            By.XPATH, "//a[contains(@class, 'comments__btn-all')]"
+        )
+        if elems:
+            return elems[0]
+        driver.execute_script("window.scrollBy(0, 400);")
+        return False
+
+    def open_reviews_section(self) -> bool:
+        """Открывает раздел с отзывами."""
         try:
-            button = self.wait.until(
+            button = self.wait.until(self._find_reviews_button)
+            self.driver.execute_script(
+                "arguments[0].scrollIntoView({block: 'center'});", button
+            )
+            self.wait.until(
                 EC.element_to_be_clickable(
                     (By.XPATH, "//a[contains(@class, 'comments__btn-all')]")
                 )
-            )
-            self.driver.execute_script("arguments[0].click();", button)
+            ).click()
             return True
-        except Exception:
+        except TimeoutException:
             return False
 
     def scroll_to_load_reviews(self):
@@ -55,8 +69,8 @@ class PageLoader:
                     )
                     > last_height
                 )
+                last_height = self.driver.execute_script(
+                    "return document.body.scrollHeight"
+                )
             except Exception:
                 break
-            last_height = self.driver.execute_script(
-                "return document.body.scrollHeight"
-            )
